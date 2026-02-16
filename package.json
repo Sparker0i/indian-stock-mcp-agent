@@ -1,0 +1,23 @@
+{
+  "name": "indian-broker-mcp",
+  "version": "1.0.0",
+  "type": "module",
+  "bin": {
+    "indian-broker-mcp": "./build/index.js"
+  },
+  "scripts": {
+    "build": "tsc && chmod 755 build/index.js",
+    "dev": "tsc --watch",
+    "start": "node build/index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "latest",
+    "zod": "^3.25.0",
+    "playwright": "^1.48.0",
+    "dotenv": "^16.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.6.0"
+  }
+}
