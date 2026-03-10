@@ -11,6 +11,7 @@ export interface Config {
   browserDataDir: string;
   logLevel: string;
   recordingsDir: string;
+  brokerCookieEnv: Partial<Record<"groww" | "zerodha" | "indmoney", string>>;
 }
 
 export function loadConfig(): Config {
@@ -22,6 +23,11 @@ export function loadConfig(): Config {
     browserDataDir: path.resolve(process.env.BROWSER_DATA_DIR || "./browser-data"),
     logLevel: process.env.LOG_LEVEL || "info",
     recordingsDir: path.resolve(process.env.RECORDINGS_DIR || "./recordings"),
+    brokerCookieEnv: {
+      groww: process.env.GROWW_COOKIES || undefined,
+      zerodha: process.env.ZERODHA_COOKIES || undefined,
+      indmoney: process.env.INDMONEY_COOKIES || undefined,
+    },
   };
 }
 

@@ -122,6 +122,14 @@ You can also connect using cookies from your browser's DevTools:
 
 > "Connect to Groww using these cookies: `<paste from document.cookie>`"
 
+You can also preload cookies in `.env` and connect without passing cookies in chat:
+
+```bash
+INDMONEY_COOKIES="token=...; trace_id=...; user_id=...; user_session_id=...; device_id=...; __cf_bm=...; refresh_token=..."
+```
+
+Then call `broker_connect` with `method: "cookies"` and `broker: "indmoney"`.
+
 ### Step 2: Query your portfolio
 
 Once connected, ask naturally:
@@ -148,7 +156,7 @@ This wipes the session data and deletes the browser profile for that broker.
 
 | Tool | Parameters | Description |
 |---|---|---|
-| `broker_connect` | `broker` (groww/zerodha/indmoney), `method` (browser_login/cookies), `cookies?` | Connect to a broker |
+| `broker_connect` | `broker` (groww/zerodha/indmoney), `method` (browser_login/cookies), `cookies?` | Connect to a broker. For `method=cookies`, uses `cookies` input or falls back to `{BROKER}_COOKIES` from `.env` |
 | `broker_disconnect` | `broker` | Disconnect and wipe session |
 | `broker_status` | — | Show connection status for all brokers |
 

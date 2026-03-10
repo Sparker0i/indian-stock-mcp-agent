@@ -181,18 +181,34 @@ export function createServer(): {
     {
       broker: z.enum(["groww", "zerodha", "indmoney"]),
       method: z.enum(["browser_login", "cookies"]).default("browser_login"),
-      cookies: z.string().optional().describe("Raw cookie string if method is 'cookies'"),
+      cookies: z.string().optional().describe("Raw cookie string if method is 'cookies' (optional if set in .env)"),
     },
     async ({ broker, method, cookies }) => {
       const brokerName = broker as BrokerName;
 
-      if (method === "cookies" && cookies) {
+      if (method === "cookies") {
+        const cookieSource = cookies || config.brokerCookieEnv[brokerName];
+        if (!cookieSource) {
+          return {
+            content: [{
+              type: "text",
+              text: `No cookies provided for ${BROKER_META[brokerName].displayName}. Pass cookies in tool input or set ${brokerName.toUpperCase()}_COOKIES in .env.`,
+            }],
+            isError: true,
+          };
+        }
+
         const context = await browserManager.getContext(brokerName, false);
         const page = await context.newPage();
         try {
           const authFlow = new AuthFlow(brokerName);
-          await authFlow.connectWithCookies(page, cookies, sessionStore);
+          await authFlow.connectWithCookies(page, cookieSource, sessionStore);
           initAdapter(brokerName, context);
+          const adapter = adapters.get(brokerName);
+          if (adapter) {
+            await adapter.connect("cookies");
+            logger.info(`Adapter connected for ${brokerName} via cookies`);
+          }
           return {
             content: [{ type: "text", text: `Successfully connected to ${BROKER_META[brokerName].displayName} using cookies.` }],
           };

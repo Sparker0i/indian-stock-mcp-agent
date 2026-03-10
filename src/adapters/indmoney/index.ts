@@ -160,25 +160,84 @@ export class IndmoneyAdapter extends BaseAdapter {
   }
 
   private normalizeMutualFund(raw: IndmoneyRawMutualFund): MutualFundHolding {
-    const investedValue = raw.investedAmount ?? raw.investedValue ?? 0;
-    const returns = raw.returns ?? raw.pnl ?? (raw.currentValue - investedValue);
-    const returnsPercent = raw.returnsPercentage ?? raw.pnlPercentage ?? (investedValue > 0 ? (returns / investedValue) * 100 : 0);
+    const schemeName = raw.schemeName
+      || raw.title?.text
+      || raw.sort_filter_tags?.fundName
+      || "Unknown Scheme";
+
+    const investedValue = raw.investedAmount
+      ?? raw.investedValue
+      ?? raw.sort_filter_tags?.investedAmount
+      ?? this.parseCurrency(raw.column1?.subTitle?.text)
+      ?? 0;
+
+    const currentValue = raw.currentValue
+      ?? raw.sort_filter_tags?.currentValue
+      ?? this.parseCurrency(raw.column2?.subTitle?.text)
+      ?? 0;
+
+    const returns = raw.returns ?? raw.pnl ?? (currentValue - investedValue);
+
+    const returnsPercent = raw.returnsPercentage
+      ?? raw.pnlPercentage
+      ?? raw.sort_filter_tags?.gainPercentage
+      ?? (investedValue > 0 ? (returns / investedValue) * 100 : 0);
+
+    const units = raw.units
+      ?? this.parseUnits(raw.column3?.values?.[3]?.subTitle?.text)
+      ?? 0;
+
+    const xirr = raw.xirr
+      ?? raw.sort_filter_tags?.xirr
+      ?? this.parsePercent(raw.column3?.values?.[2]?.subTitle?.text);
 
     return {
       broker: this.name,
-      schemeName: raw.schemeName,
+      schemeName,
       amcName: raw.amcName || raw.amc || "",
       folioNumber: raw.folioNumber || raw.folio || "",
-      units: raw.units,
-      nav: raw.nav,
+      units,
+      nav: raw.nav ?? 0,
       investedValue,
-      currentValue: raw.currentValue,
+      currentValue,
       returns,
       returnsPercent,
-      xirr: raw.xirr,
+      xirr,
       sipActive: raw.sipActive ?? raw.isSipActive ?? false,
-      category: raw.category || raw.subCategory || "",
+      category: raw.category
+        || raw.sort_filter_tags?.category?.[0]
+        || raw.sort_filter_tags?.subCategory?.[0]
+        || raw.subCategory
+        || "",
     };
+  }
+
+  private parseCurrency(value?: string): number | undefined {
+    if (!value) return undefined;
+    const compact = value.replace(/,/g, "").trim();
+    const lower = compact.toLowerCase();
+    const numeric = parseFloat(lower.replace(/[^0-9.-]/g, ""));
+    if (Number.isNaN(numeric)) return undefined;
+    if (lower.includes("cr")) return numeric * 10000000;
+    if (lower.includes("l")) return numeric * 100000;
+    if (lower.includes("k")) return numeric * 1000;
+    return numeric;
+  }
+
+  private parsePercent(value?: string): number | undefined {
+    if (!value) return undefined;
+    const numeric = parseFloat(value.replace(/[^0-9.-]/g, ""));
+    return Number.isNaN(numeric) ? undefined : numeric;
+  }
+
+  private parseUnits(value?: string): number | undefined {
+    if (!value) return undefined;
+    const compact = value.replace(/,/g, "").trim().toLowerCase();
+    const numeric = parseFloat(compact.replace(/[^0-9.-]/g, ""));
+    if (Number.isNaN(numeric)) return undefined;
+    if (compact.includes("k")) return numeric * 1000;
+    if (compact.includes("m")) return numeric * 1000000;
+    return numeric;
   }
 
   private normalizeUSStock(raw: IndmoneyRawUSStock): USStockHolding {
