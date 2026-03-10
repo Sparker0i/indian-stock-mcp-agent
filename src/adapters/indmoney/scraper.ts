@@ -25,6 +25,7 @@ export class IndmoneyScraper {
     this.interceptor.addPattern("indianStocksApi", INDMONEY_PATTERNS.indianStocksApi);
     this.interceptor.addPattern("mutualFunds", INDMONEY_PATTERNS.mutualFunds);
     this.interceptor.addPattern("mutualFundsApi", INDMONEY_PATTERNS.mutualFundsApi);
+    this.interceptor.addPattern("mutualFundsPortfolioApi", INDMONEY_PATTERNS.mutualFundsPortfolioApi);
     this.interceptor.addPattern("usStocks", INDMONEY_PATTERNS.usStocks);
     this.interceptor.addPattern("usStocksApi", INDMONEY_PATTERNS.usStocksApi);
     this.interceptor.addPattern("gold", INDMONEY_PATTERNS.gold);
@@ -64,11 +65,12 @@ export class IndmoneyScraper {
     logger.info("INDmoney: Fetching mutual funds");
     this.interceptor.clearPattern("mutualFunds");
     this.interceptor.clearPattern("mutualFundsApi");
+    this.interceptor.clearPattern("mutualFundsPortfolioApi");
 
     await page.goto(INDMONEY_URLS.mutualFunds, { waitUntil: "networkidle", timeout: 30000 });
     await randomDelay(1000, 2000);
 
-    for (const pattern of ["mutualFundsApi", "mutualFunds"]) {
+    for (const pattern of ["mutualFundsPortfolioApi", "mutualFundsApi", "mutualFunds"]) {
       const captures = this.interceptor.getCaptures(pattern);
       for (const capture of captures) {
         const mfs = this.extractMutualFunds(capture.body);
@@ -155,8 +157,35 @@ export class IndmoneyScraper {
 
   private extractMutualFunds(body: unknown): IndmoneyRawMutualFund[] {
     if (Array.isArray(body)) return body as IndmoneyRawMutualFund[];
-    const obj = body as IndmoneyMutualFundsResponse;
-    return obj.mutualFunds || obj.investments || obj.holdings || [];
+    const obj = body as IndmoneyMutualFundsResponse & {
+      data?: {
+        funds?: IndmoneyRawMutualFund[];
+        mutualFunds?: IndmoneyRawMutualFund[];
+        investments?: IndmoneyRawMutualFund[];
+        holdings?: IndmoneyRawMutualFund[];
+      };
+      result?: {
+        funds?: IndmoneyRawMutualFund[];
+        mutualFunds?: IndmoneyRawMutualFund[];
+        investments?: IndmoneyRawMutualFund[];
+        holdings?: IndmoneyRawMutualFund[];
+      };
+      funds?: IndmoneyRawMutualFund[];
+    };
+
+    return obj.mutualFunds
+      || obj.investments
+      || obj.holdings
+      || obj.funds
+      || obj.data?.funds
+      || obj.data?.mutualFunds
+      || obj.data?.investments
+      || obj.data?.holdings
+      || obj.result?.funds
+      || obj.result?.mutualFunds
+      || obj.result?.investments
+      || obj.result?.holdings
+      || [];
   }
 
   private extractUSStocks(body: unknown): IndmoneyRawUSStock[] {

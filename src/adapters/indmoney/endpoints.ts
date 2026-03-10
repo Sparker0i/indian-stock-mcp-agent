@@ -6,7 +6,8 @@ export const INDMONEY_URLS = {
   login: "https://www.indmoney.com/",
   dashboard: "https://www.indmoney.com/dashboard",
   indianStocks: "https://www.indmoney.com/indian-stocks/portfolio",
-  mutualFunds: "https://www.indmoney.com/mutual-funds/portfolio",
+  mutualFunds: "https://www.indmoney.com/investments/mutual-fund/my-funds",
+  mutualFundsExplore: "https://www.indmoney.com/investments/mutual-fund/explore-all",
   usStocks: "https://www.indmoney.com/us-stocks/portfolio",
   gold: "https://www.indmoney.com/gold",
   orders: "https://www.indmoney.com/orders",
@@ -22,8 +23,9 @@ export const INDMONEY_PATTERNS = {
   indianStocksApi: /api.*indmoney\.com.*\/(stock|equity|holding)/i,
 
   // Mutual Funds
-  mutualFunds: /indmoney\.com.*\/(mutual-fund|mf).*(portfolio|holding)/i,
+  mutualFunds: /indmoney\.com.*\/(mutual-fund|mf).*(portfolio|holding|my-funds|explore-all)/i,
   mutualFundsApi: /api.*indmoney\.com.*\/(mutual-fund|mf)/i,
+  mutualFundsPortfolioApi: /apixt-iw\.indmoney\.com\/mf-tracking-ext\/v1\/users\/portfolio\/funds/i,
 
   // US Stocks
   usStocks: /indmoney\.com.*\/(us-stock).*(portfolio|holding)/i,

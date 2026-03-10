@@ -33,17 +33,17 @@ export interface IndmoneyHoldingsResponse {
 
 // Mutual Funds
 export interface IndmoneyRawMutualFund {
-  schemeName: string;
+  schemeName?: string;
   schemeCode?: string;
   amcName?: string;
   amc?: string;
   folioNumber?: string;
   folio?: string;
-  units: number;
-  nav: number;
+  units?: number;
+  nav?: number;
   investedAmount?: number;
   investedValue?: number;
-  currentValue: number;
+  currentValue?: number;
   returns?: number;
   pnl?: number;
   returnsPercentage?: number;
@@ -53,6 +53,26 @@ export interface IndmoneyRawMutualFund {
   isSipActive?: boolean;
   category?: string;
   subCategory?: string;
+
+  title?: { text?: string };
+  column1?: { subTitle?: { text?: string } };
+  column2?: { subTitle?: { text?: string } };
+  column3?: {
+    values?: Array<{
+      title?: { text?: string };
+      subTitle?: { text?: string };
+      subTitle2?: { text?: string };
+    }>;
+  };
+  sort_filter_tags?: {
+    currentValue?: number;
+    investedAmount?: number;
+    gainPercentage?: number;
+    fundName?: string;
+    xirr?: number;
+    category?: string[];
+    subCategory?: string[];
+  };
 }
 
 export interface IndmoneyMutualFundsResponse {
