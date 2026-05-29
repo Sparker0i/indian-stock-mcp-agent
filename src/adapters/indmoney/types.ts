@@ -62,21 +62,25 @@ export interface IndmoneyMutualFundsResponse {
   [key: string]: unknown;
 }
 
-// US Stocks
+// US Stocks — fields match INDmoney's
+// /us-stocks-ext/api/v1/stocks/dw/user/account/holdings response.
+// Amounts are in USD; fxRate is attached by the scraper from the
+// account/basic endpoint so the normalizer can convert to INR.
 export interface IndmoneyRawUSStock {
-  symbol: string;
-  companyName?: string;
-  name?: string;
+  ticker: string;
+  name: string;
   quantity: number;
-  averagePriceUsd?: number;
-  avgPriceUsd?: number;
-  currentPriceUsd?: number;
-  ltpUsd?: number;
-  investedValueInr?: number;
-  investedAmountInr?: number;
-  currentValueInr: number;
-  pnlInr?: number;
-  pnlPercentage?: number;
+  avg_price: number;
+  live_price: number;
+  invested_amount: number;
+  current_value: number;
+  total_profit_loss: number;
+  total_percent_change: number;
+  todays_profit_loss?: number;
+  todays_percent_change?: number;
+  sector?: string;
+  market_cap?: string;
+  fxRate?: number;
 }
 
 export interface IndmoneyUSStocksResponse {

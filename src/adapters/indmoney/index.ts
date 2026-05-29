@@ -182,16 +182,20 @@ export class IndmoneyAdapter extends BaseAdapter {
   }
 
   private normalizeUSStock(raw: IndmoneyRawUSStock): USStockHolding {
+    // INDmoney returns USD amounts; fxRate (USD→INR) is attached by the scraper
+    // from the account/basic endpoint. If FX is missing, INR fields fall back
+    // to USD numbers — better than zero, and the caller can detect via fxRate.
+    const fx = raw.fxRate ?? 1;
     return {
       broker: this.name,
-      symbol: raw.symbol,
-      name: raw.companyName || raw.name || raw.symbol,
+      symbol: raw.ticker,
+      name: raw.name || raw.ticker,
       quantity: raw.quantity,
-      averagePriceUSD: raw.averagePriceUsd ?? raw.avgPriceUsd ?? 0,
-      currentPriceUSD: raw.currentPriceUsd ?? raw.ltpUsd ?? 0,
-      investedValueINR: raw.investedValueInr ?? raw.investedAmountInr ?? 0,
-      currentValueINR: raw.currentValueInr,
-      pnlINR: raw.pnlInr ?? (raw.currentValueInr - (raw.investedValueInr ?? raw.investedAmountInr ?? 0)),
+      averagePriceUSD: raw.avg_price,
+      currentPriceUSD: raw.live_price,
+      investedValueINR: raw.invested_amount * fx,
+      currentValueINR: raw.current_value * fx,
+      pnlINR: raw.total_profit_loss * fx,
     };
   }
 
